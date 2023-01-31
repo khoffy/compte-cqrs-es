@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: compte-service
+    description: Compte service for Event Driven Application
+#    basedir: ${user.home}/.${spring.application.name}
+  datasource:
+    database: bankdb
+    hostname: ${POSTGRES_HOST:localhost}
+    port: ${POSTGRES_PORT:5432}
+    username: ${POSTGRES_USER:khoffy}
+    password: ${POSTGRES_PASSWD:SwaY890}
+    url: jdbc:postgresql://${spring.datasource.hostname}:${spring.datasource.port}/${spring.datasource.database}
+  initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database: postgresql
+
+server:
+  port: 8082
