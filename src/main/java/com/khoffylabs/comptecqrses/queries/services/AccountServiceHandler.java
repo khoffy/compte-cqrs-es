@@ -5,17 +5,21 @@ import com.khoffylabs.comptecqrses.commonApi.events.AccountActivatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreditedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountDebitedEvent;
+import com.khoffylabs.comptecqrses.commonApi.queries.GetAccountByIdQuery;
+import com.khoffylabs.comptecqrses.commonApi.queries.GetAllAccountsQuery;
 import com.khoffylabs.comptecqrses.queries.entities.Account;
 import com.khoffylabs.comptecqrses.queries.entities.Operation;
 import com.khoffylabs.comptecqrses.queries.repositories.AccountRepository;
 import com.khoffylabs.comptecqrses.queries.repositories.OperationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -75,6 +79,16 @@ public class AccountServiceHandler {
         operationRepository.save(operation);
         account.setBalance(account.getBalance() + event.getAmount());
         accountRepository.save(account);
+    }
+
+    @QueryHandler
+    public List<Account> on(GetAllAccountsQuery query) {
+        return accountRepository.findAll();
+    }
+
+    @QueryHandler
+    public Account on(GetAccountByIdQuery query) {
+        return accountRepository.findById(query.getAccountId()).get();
     }
 
     @Autowired
