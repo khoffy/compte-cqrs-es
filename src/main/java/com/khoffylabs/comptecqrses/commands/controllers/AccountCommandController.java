@@ -2,7 +2,9 @@ package com.khoffylabs.comptecqrses.commands.controllers;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.dtos.CreateAccountRequestDto;
+import lombok.Getter;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +12,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping(path = "/commands/account")
 public class AccountCommandController {
 
+    /**
+     *
+     */
     private CommandGateway commandGateway;
+
+    /**
+     * Allows to read events from EventStore
+     */
+    private EventStore eventStore;
     @PostMapping(path = "/create")
     public CompletableFuture<String> createAccount(@RequestBody CreateAccountRequestDto request) {
         CompletableFuture<String> commandResponse = commandGateway.send(new CreateAccountCommand(
@@ -24,6 +35,16 @@ public class AccountCommandController {
                 request.getCurrency())
         );
         return commandResponse;
+    }
+
+    /**
+     * Display all events related to an account
+     * @param accountId
+     * @return
+     */
+    @GetMapping("/eventStore/{accountId}")
+    public Stream eventStore(@PathVariable String accountId) {
+        return eventStore.readEvents(accountId).asStream();
     }
 
     @ExceptionHandler(Exception.class)
@@ -38,5 +59,10 @@ public class AccountCommandController {
     @Autowired
     public void setCommandGateway(CommandGateway commandGateway) {
         this.commandGateway = commandGateway;
+    }
+
+    @Autowired
+    public void setEventStore(EventStore eventStore) {
+        this.eventStore = eventStore;
     }
 }
