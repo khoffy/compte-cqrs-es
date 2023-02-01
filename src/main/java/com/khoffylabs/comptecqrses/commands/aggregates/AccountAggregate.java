@@ -2,6 +2,7 @@ package com.khoffylabs.comptecqrses.commands.aggregates;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.enums.AccountStatus;
+import com.khoffylabs.comptecqrses.commonApi.events.AccountActivatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreatedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -59,5 +60,18 @@ public class AccountAggregate {
         this.balance = accountCreatedEvent.getInitialBalance();
         this.currency = accountCreatedEvent.getCurrency();
         this.status = AccountStatus.CREATED;
+
+        // Once the aggregate state has changed, one can emit another event
+        AggregateLifecycle.apply(
+                new AccountActivatedEvent(
+                        accountCreatedEvent.getId(),
+                        AccountStatus.ACTIVATED
+                ));
+    }
+
+    // Emitting another event inside the AccountCreatedEvent handler, we need to mutate the app state
+    @EventSourcingHandler
+    public void on(AccountActivatedEvent accountActivatedEvent) {
+        this.status = accountActivatedEvent.getStatus();
     }
 }
