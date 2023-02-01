@@ -49,7 +49,8 @@ public class AccountAggregate {
         AggregateLifecycle.apply(
                 new AccountCreatedEvent(createAccountCommand.getId(),
                         createAccountCommand.getInitialBalance(),
-                        createAccountCommand.getCurrency()
+                        createAccountCommand.getCurrency(),
+                        AccountStatus.CREATED
                 )
         );
     }
@@ -109,7 +110,7 @@ public class AccountAggregate {
         // if OK, emit an event
         // Once the event emitted, we need to mutate the app state, by implementing an eventSourcingHandler
         AggregateLifecycle.apply(
-                new AccountCreatedEvent(
+                new AccountDebitedEvent(
                         debitAccountCommand.getId(),
                         debitAccountCommand.getAmount(),
                         debitAccountCommand.getCurrency()
