@@ -1,9 +1,12 @@
 package com.khoffylabs.comptecqrses.commands.aggregates;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
+import com.khoffylabs.comptecqrses.commonApi.commands.CreditAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.enums.AccountStatus;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountActivatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreatedEvent;
+import com.khoffylabs.comptecqrses.commonApi.events.AccountCreditedEvent;
+import com.khoffylabs.comptecqrses.commonApi.exceptions.NegativeAmountException;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -73,5 +76,25 @@ public class AccountAggregate {
     @EventSourcingHandler
     public void on(AccountActivatedEvent accountActivatedEvent) {
         this.status = accountActivatedEvent.getStatus();
+    }
+
+    @CommandHandler
+    public void handle (CreditAccountCommand creditAccountCommand) {
+        // Business rule
+        if(creditAccountCommand.getAmount() < 0) throw new NegativeAmountException("Amount should not be negative!");
+        // if OK, emit an event
+        // Once the event emitted, we need to mutate the app state, by implementing an eventSourcingHandler
+        AggregateLifecycle.apply(
+                new AccountCreatedEvent(
+                        creditAccountCommand.getId(),
+                        creditAccountCommand.getAmount(),
+                        creditAccountCommand.getCurrency()
+                )
+        );
+    }
+
+    @EventSourcingHandler
+    public void on(AccountCreditedEvent event) {
+        this.balance += event.getAmount();
     }
 }

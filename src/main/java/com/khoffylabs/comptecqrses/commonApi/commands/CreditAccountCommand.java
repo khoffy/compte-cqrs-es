@@ -1,7 +1,12 @@
 package com.khoffylabs.comptecqrses.commonApi.commands;
 
+import lombok.Getter;
+
 public class CreditAccountCommand extends BaseCommand<String> {
+    @Getter
     private double amount;
+
+    @Getter
     private String currency;
     public CreditAccountCommand(String id, double amount, String currency) {
         super(id);

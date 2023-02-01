@@ -1,8 +1,9 @@
 package com.khoffylabs.comptecqrses.commands.controllers;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
+import com.khoffylabs.comptecqrses.commonApi.commands.CreditAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.dtos.CreateAccountRequestDto;
-import lombok.Getter;
+import com.khoffylabs.comptecqrses.commonApi.dtos.CreditAccountRequestDto;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,16 @@ public class AccountCommandController {
         CompletableFuture<String> commandResponse = commandGateway.send(new CreateAccountCommand(
                 UUID.randomUUID().toString(),
                 request.getInitialBalance(),
+                request.getCurrency())
+        );
+        return commandResponse;
+    }
+
+    @PutMapping(path = "/credit")
+    public CompletableFuture<String> crediteAccount(@RequestBody CreditAccountRequestDto request) {
+        CompletableFuture<String> commandResponse = commandGateway.send(new CreditAccountCommand(
+                request.getAccountId(),
+                request.getAmount(),
                 request.getCurrency())
         );
         return commandResponse;
