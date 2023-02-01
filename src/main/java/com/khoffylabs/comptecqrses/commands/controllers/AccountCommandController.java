@@ -2,8 +2,10 @@ package com.khoffylabs.comptecqrses.commands.controllers;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.commands.CreditAccountCommand;
+import com.khoffylabs.comptecqrses.commonApi.commands.DebitAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.dtos.CreateAccountRequestDto;
 import com.khoffylabs.comptecqrses.commonApi.dtos.CreditAccountRequestDto;
+import com.khoffylabs.comptecqrses.commonApi.dtos.DebitAccountRequestDto;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,16 @@ public class AccountCommandController {
     @PutMapping(path = "/credit")
     public CompletableFuture<String> crediteAccount(@RequestBody CreditAccountRequestDto request) {
         CompletableFuture<String> commandResponse = commandGateway.send(new CreditAccountCommand(
+                request.getAccountId(),
+                request.getAmount(),
+                request.getCurrency())
+        );
+        return commandResponse;
+    }
+
+    @PutMapping(path = "/debit")
+    public CompletableFuture<String> debitAccount(@RequestBody DebitAccountRequestDto request) {
+        CompletableFuture<String> commandResponse = commandGateway.send(new DebitAccountCommand(
                 request.getAccountId(),
                 request.getAmount(),
                 request.getCurrency())

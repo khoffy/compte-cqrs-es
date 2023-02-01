@@ -1,13 +1,15 @@
-package com.khoffylabs.comptecqrses.commonApi.commands;
+package com.khoffylabs.comptecqrses.commonApi.events;
 
 import lombok.Getter;
 
-public class DebitAccountCommand extends BaseCommand<String> {
+public class AccountDebitedEvent extends BaseEvent<String> {
+
     @Getter
     private double amount;
+
     @Getter
     private String currency;
-    public DebitAccountCommand(String id, double amount, String currency) {
+    public AccountDebitedEvent(String id, double amount, String currency) {
         super(id);
         this.amount = amount;
         this.currency = currency;

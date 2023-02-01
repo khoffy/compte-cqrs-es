@@ -2,10 +2,13 @@ package com.khoffylabs.comptecqrses.commands.aggregates;
 
 import com.khoffylabs.comptecqrses.commonApi.commands.CreateAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.commands.CreditAccountCommand;
+import com.khoffylabs.comptecqrses.commonApi.commands.DebitAccountCommand;
 import com.khoffylabs.comptecqrses.commonApi.enums.AccountStatus;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountActivatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreatedEvent;
 import com.khoffylabs.comptecqrses.commonApi.events.AccountCreditedEvent;
+import com.khoffylabs.comptecqrses.commonApi.events.AccountDebitedEvent;
+import com.khoffylabs.comptecqrses.commonApi.exceptions.BalanceNotSufficientException;
 import com.khoffylabs.comptecqrses.commonApi.exceptions.NegativeAmountException;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -85,7 +88,7 @@ public class AccountAggregate {
         // if OK, emit an event
         // Once the event emitted, we need to mutate the app state, by implementing an eventSourcingHandler
         AggregateLifecycle.apply(
-                new AccountCreatedEvent(
+                new AccountCreditedEvent(
                         creditAccountCommand.getId(),
                         creditAccountCommand.getAmount(),
                         creditAccountCommand.getCurrency()
@@ -96,5 +99,26 @@ public class AccountAggregate {
     @EventSourcingHandler
     public void on(AccountCreditedEvent event) {
         this.balance += event.getAmount();
+    }
+
+    @CommandHandler
+    public void handle (DebitAccountCommand debitAccountCommand) {
+        // Business rule
+        if(debitAccountCommand.getAmount() < 0) throw new NegativeAmountException("Amount should not be negative!");
+        if(debitAccountCommand.getAmount() > this.balance) throw new BalanceNotSufficientException("Balance not sufficient Exception => " + balance);
+        // if OK, emit an event
+        // Once the event emitted, we need to mutate the app state, by implementing an eventSourcingHandler
+        AggregateLifecycle.apply(
+                new AccountCreatedEvent(
+                        debitAccountCommand.getId(),
+                        debitAccountCommand.getAmount(),
+                        debitAccountCommand.getCurrency()
+                )
+        );
+    }
+
+    @EventSourcingHandler
+    public void on(AccountDebitedEvent event) {
+        this.balance -= event.getAmount();
     }
 }
